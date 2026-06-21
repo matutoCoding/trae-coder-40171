@@ -38,6 +38,7 @@ export const mockBenefits: Benefit[] = [
     eligibleProducts: '医保目录内药品、医疗器械（体温计、血压计等）',
     needsConfirmation: true,
     checkoutReminder: '确认顾客已登记领取后再完成结算',
+    minSpend: 200,
   },
   {
     id: 'B002',
@@ -52,6 +53,7 @@ export const mockBenefits: Benefit[] = [
     eligibleProducts: '高血压、糖尿病等慢病处方药（需凭处方）',
     needsConfirmation: false,
     checkoutReminder: '确认处方有效性，个账自动抵扣',
+    applicableKeywords: ['高血压', '降压'],
   },
   {
     id: 'B003',
@@ -94,6 +96,7 @@ export const mockBenefits: Benefit[] = [
     eligibleProducts: '医保目录内药品、医疗器械',
     needsConfirmation: true,
     checkoutReminder: '确认顾客领取意愿后登记',
+    minSpend: 150,
   },
   {
     id: 'B006',
@@ -108,6 +111,7 @@ export const mockBenefits: Benefit[] = [
     eligibleProducts: '糖尿病处方药（需凭处方）',
     needsConfirmation: false,
     checkoutReminder: '确认处方有效性，个账自动抵扣',
+    applicableKeywords: ['糖尿病', '降糖'],
   },
   {
     id: 'B007',

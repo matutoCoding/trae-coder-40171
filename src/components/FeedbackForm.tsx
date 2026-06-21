@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   XCircle,
   Ban,
+  MinusCircle,
   ArrowLeft,
   Send,
   Check,
@@ -59,6 +60,17 @@ const feedbackOptions: {
     activeText: 'text-slate-600',
     badgeBg: 'bg-slate-100',
     badgeText: 'text-slate-700',
+  },
+  {
+    type: 'not_needed',
+    label: '暂不需要',
+    desc: '本次不需要使用该权益',
+    icon: MinusCircle,
+    activeBg: 'bg-slate-50',
+    activeBorder: 'border-slate-300',
+    activeText: 'text-slate-500',
+    badgeBg: 'bg-slate-100',
+    badgeText: 'text-slate-600',
   },
 ]
 

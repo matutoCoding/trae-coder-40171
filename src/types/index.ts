@@ -1,5 +1,5 @@
 export type BenefitStatus = 'available' | 'expiring' | 'unavailable'
-export type FeedbackType = 'reminded' | 'declined' | 'inapplicable'
+export type FeedbackType = 'reminded' | 'declined' | 'inapplicable' | 'not_needed'
 export type BenefitCategory = 'gift' | 'chronic' | 'family' | 'other'
 
 export interface Member {
@@ -23,6 +23,8 @@ export interface Benefit {
   eligibleProducts: string
   needsConfirmation: boolean
   checkoutReminder: string
+  minSpend?: number
+  applicableKeywords?: string[]
 }
 
 export interface FeedbackRecord {
@@ -36,6 +38,10 @@ export interface FeedbackRecord {
   cashierId: string
   cashierName: string
   createdAt: string
+  sessionId: string
+  coveredAmount: number
+  cartItemCount: number
+  cartSummary: string
 }
 
 export interface CartItem {
@@ -45,4 +51,5 @@ export interface CartItem {
   qty: number
   category: '药品' | '医疗器械' | '保健品'
   insuranceCovered: boolean
+  keywords?: string[]
 }

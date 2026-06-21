@@ -52,7 +52,11 @@ interface FeedbackState {
     member: Member,
     benefit: Benefit,
     type: FeedbackType,
-    remark: string
+    remark: string,
+    sessionId?: string,
+    coveredAmount?: number,
+    cartItemCount?: number,
+    cartSummary?: string,
   ) => void
 }
 
@@ -61,9 +65,10 @@ const CURRENT_CASHIER = { cashierId: 'C001', cashierName: '李收银' }
 export const useFeedbackStore = create<FeedbackState>((set) => ({
   submittedFeedbacks: JSON.parse(localStorage.getItem('feedbacks_v2') || '[]'),
 
-  submitFeedback: (member, benefit, type, remark) => {
+  submitFeedback: (member, benefit, type, remark, sessionId, coveredAmount, cartItemCount, cartSummary) => {
+    const cart = useCartStore.getState()
     const entry: FeedbackRecord = {
-      id: `F${Date.now()}`,
+      id: `F${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       memberId: member.id,
       memberName: member.name,
       benefitId: benefit.id,
@@ -73,6 +78,10 @@ export const useFeedbackStore = create<FeedbackState>((set) => ({
       cashierId: CURRENT_CASHIER.cashierId,
       cashierName: CURRENT_CASHIER.cashierName,
       createdAt: new Date().toISOString(),
+      sessionId: sessionId || cart.sessionId,
+      coveredAmount: coveredAmount ?? cart.totalCovered,
+      cartItemCount: cartItemCount ?? cart.items.length,
+      cartSummary: cartSummary ?? cart.items.map((i) => `${i.name}×${i.qty}`).join(', '),
     }
     set((state) => {
       const updated = [...state.submittedFeedbacks, entry]
@@ -88,8 +97,11 @@ interface CashierState {
 }
 export const useCashierStore = create<CashierState>(() => CURRENT_CASHIER)
 
+const generateSessionId = () => `S${Date.now()}`
+
 interface CartState {
   items: CartItem[]
+  sessionId: string
   addItem: (item: Omit<CartItem, 'qty'> & { qty?: number }) => void
   removeItem: (id: string) => void
   updateQty: (id: string, qty: number) => void
@@ -100,13 +112,14 @@ interface CartState {
 }
 
 const seedCart: CartItem[] = [
-  { id: 'P001', name: '氨氯地平片（高血压）', price: 28.5, qty: 2, category: '药品', insuranceCovered: true },
+  { id: 'P001', name: '氨氯地平片（高血压）', price: 28.5, qty: 2, category: '药品', insuranceCovered: true, keywords: ['高血压', '降压'] },
   { id: 'P002', name: '电子体温计', price: 45.0, qty: 1, category: '医疗器械', insuranceCovered: true },
   { id: 'P003', name: '维生素C泡腾片', price: 32.0, qty: 1, category: '保健品', insuranceCovered: false },
 ]
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: seedCart,
+  sessionId: generateSessionId(),
 
   addItem: (item) =>
     set((state) => {
@@ -128,7 +141,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       items: state.items.map((i) => (i.id === id ? { ...i, qty: Math.max(1, qty) } : i)),
     })),
 
-  clear: () => set({ items: [] }),
+  clear: () => set({ items: [], sessionId: generateSessionId() }),
 
   get total() {
     return get().items.reduce((s, i) => s + i.price * i.qty, 0)

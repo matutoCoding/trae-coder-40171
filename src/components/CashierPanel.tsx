@@ -18,17 +18,19 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import type { CartItem, Benefit } from '@/types'
+import type { CartItem, Benefit, FeedbackType } from '@/types'
 import MemberSearch from './MemberSearch'
 import CheckoutReminder from './CheckoutReminder'
 
 const QUICK_ITEMS: Array<Omit<CartItem, 'qty'>> = [
-  { id: 'P010', name: '复方感冒灵颗粒', price: 18.0, category: '药品', insuranceCovered: true },
-  { id: 'P011', name: '硝苯地平缓释片', price: 22.5, category: '药品', insuranceCovered: true },
+  { id: 'P010', name: '复方感冒灵颗粒', price: 18.0, category: '药品', insuranceCovered: true, keywords: ['感冒'] },
+  { id: 'P011', name: '硝苯地平缓释片', price: 22.5, category: '药品', insuranceCovered: true, keywords: ['高血压', '降压'] },
   { id: 'P012', name: '欧姆龙电子血压计', price: 258.0, category: '医疗器械', insuranceCovered: true },
   { id: 'P013', name: '汤臣倍健蛋白粉', price: 198.0, category: '保健品', insuranceCovered: false },
   { id: 'P014', name: '碘伏棉签', price: 12.0, category: '医疗器械', insuranceCovered: true },
-  { id: 'P015', name: '健胃消食片', price: 15.5, category: '药品', insuranceCovered: true },
+  { id: 'P015', name: '健胃消食片', price: 15.5, category: '药品', insuranceCovered: true, keywords: ['消化'] },
+  { id: 'P016', name: '二甲双胍缓释片', price: 19.8, category: '药品', insuranceCovered: true, keywords: ['糖尿病', '降糖'] },
+  { id: 'P017', name: '阿胶补血颗粒', price: 88.0, category: '保健品', insuranceCovered: false },
 ]
 
 const CAT_ICON: Record<string, typeof Pill> = {
@@ -38,21 +40,40 @@ const CAT_ICON: Record<string, typeof Pill> = {
 }
 
 export default function CashierPanel() {
-  const { member, selectBenefit } = useAppStore()
-  const { items, addItem, removeItem, updateQty, clear, totalCovered, totalUncovered, total } = useCartStore()
+  const { member, benefits, selectBenefit } = useAppStore()
+  const { items, addItem, removeItem, updateQty, clear, totalCovered, totalUncovered, total, sessionId } = useCartStore()
   const { cashierName } = useCashierStore()
-  const { submittedFeedbacks } = useFeedbackStore()
+  const { submitFeedback, submittedFeedbacks } = useFeedbackStore()
   const navigate = useNavigate()
   const [scanInput, setScanInput] = useState('')
   const [checkoutToast, setCheckoutToast] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [confirmations, setConfirmations] = useState<Record<string, FeedbackType>>({})
 
   const handleQuickAdd = (it: Omit<CartItem, 'qty'>) => {
     addItem(it)
     setShowSearch(false)
   }
 
+  const handleConfirm = (benefitId: string, type: FeedbackType) => {
+    setConfirmations((prev) => ({ ...prev, [benefitId]: type }))
+  }
+
   const handleCheckout = () => {
+    if (member && Object.keys(confirmations).length > 0) {
+      const currentSessionId = sessionId
+      const covered = totalCovered
+      const count = items.length
+      const summary = items.map((i) => `${i.name}×${i.qty}`).join(', ')
+      Object.entries(confirmations).forEach(([benefitId, type]) => {
+        const benefit = benefits.find((b) => b.id === benefitId)
+        if (benefit) {
+          submitFeedback(member, benefit, type, '', currentSessionId, covered, count, summary)
+        }
+      })
+      setConfirmations({})
+    }
+
     setCheckoutToast(true)
     setTimeout(() => {
       setCheckoutToast(false)
@@ -262,6 +283,8 @@ export default function CashierPanel() {
             selectBenefit(benefit)
             navigate('/feedback')
           }}
+          confirmations={confirmations}
+          onConfirm={handleConfirm}
         />
       </div>
 

@@ -24,18 +24,23 @@ function seedDemoFeedbacks() {
     ['B001', '满额健康礼包'], ['B002', '慢病复购提醒'], ['B003', '家庭账户共享'],
     ['B005', '满额健康礼包'], ['B006', '慢病复购提醒'], ['B007', '家庭账户共享'],
   ]
-  const sample: Array<{ m: number; b: number; t: 'reminded' | 'declined' | 'inapplicable'; mins: number; r: string }> = [
+  const sample: Array<{ m: number; b: number; t: 'reminded' | 'declined' | 'inapplicable' | 'not_needed'; mins: number; r: string }> = [
     { m: 0, b: 0, t: 'reminded', mins: 120, r: '顾客领取了礼包' },
     { m: 0, b: 2, t: 'declined', mins: 90, r: '不需要共享给家人' },
     { m: 1, b: 3, t: 'reminded', mins: 60, r: '' },
     { m: 1, b: 4, t: 'inapplicable', mins: 40, r: '未带处方' },
-    { m: 2, b: 5, t: 'reminded', mins: 20, r: '已使用共济账户' },
+    { m: 2, b: 5, t: 'not_needed', mins: 20, r: '' },
   ]
   const base = new Date()
-  sample.forEach((s) => {
+  const sessionId1 = `S${base.getTime() - 120 * 60 * 1000}`
+  const sessionId2 = `S${base.getTime() - 60 * 60 * 1000}`
+  const sessionId3 = `S${base.getTime() - 20 * 60 * 1000}`
+  const sessionIds = [sessionId1, sessionId1, sessionId2, sessionId2, sessionId3]
+  sample.forEach((s, idx) => {
     const [mid, mname] = members[s.m]
     const [bid, bname] = benefits[s.b]
     const created = new Date(base.getTime() - s.mins * 60 * 1000).toISOString()
+    const sid = sessionIds[idx]
     useFeedbackStore.setState((state) => {
       const entry = {
         id: `F_seed_${Math.random().toString(36).slice(2, 7)}`,
@@ -48,6 +53,10 @@ function seedDemoFeedbacks() {
         cashierId: 'C001',
         cashierName: '李收银',
         createdAt: created,
+        sessionId: sid,
+        coveredAmount: s.b === 0 ? 102.0 : s.b === 3 ? 45.0 : 0,
+        cartItemCount: s.b === 0 ? 3 : s.b === 3 ? 2 : 0,
+        cartSummary: s.b === 0 ? '氨氯地平片×2, 电子体温计×1, 维生素C泡腾片×1' : s.b === 3 ? '复方感冒灵颗粒×1, 电子体温计×1' : '',
       }
       const updated = [...state.submittedFeedbacks, entry]
       localStorage.setItem('feedbacks_v2', JSON.stringify(updated))

@@ -25,12 +25,24 @@ export interface Benefit {
   checkoutReminder: string
 }
 
-export interface Feedback {
+export interface FeedbackRecord {
   id: string
   memberId: string
+  memberName: string
   benefitId: string
+  benefitTitle: string
   type: FeedbackType
   remark: string
   cashierId: string
+  cashierName: string
   createdAt: string
+}
+
+export interface CartItem {
+  id: string
+  name: string
+  price: number
+  qty: number
+  category: '药品' | '医疗器械' | '保健品'
+  insuranceCovered: boolean
 }

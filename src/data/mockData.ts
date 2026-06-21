@@ -1,0 +1,152 @@
+import type { Member, Benefit } from '@/types'
+
+export const mockMembers: Member[] = [
+  {
+    id: 'M001',
+    name: '张丽华',
+    phone: '13800138001',
+    level: '金卡',
+    insuranceType: '职工医保',
+  },
+  {
+    id: 'M002',
+    name: '王建国',
+    phone: '13900139002',
+    level: '银卡',
+    insuranceType: '居民医保',
+  },
+  {
+    id: 'M003',
+    name: '李秀英',
+    phone: '13700137003',
+    level: '普通',
+    insuranceType: '职工医保',
+  },
+]
+
+export const mockBenefits: Benefit[] = [
+  {
+    id: 'B001',
+    memberId: 'M001',
+    title: '满额健康礼包',
+    description: '医保个账消费满200元可领取健康礼包一份，含体温计、口罩等防疫物资',
+    status: 'available',
+    expiryDate: '2026-08-31',
+    category: 'gift',
+    guide: '医保目录内商品累计满200元即可触发，收银时提醒顾客确认是否领取',
+    script: '这项权益不抵扣医保目录外商品，只提示您可用个人账户支付合规部分。您本次消费已满足健康礼包领取条件，是否需要为您登记领取？',
+    eligibleProducts: '医保目录内药品、医疗器械（体温计、血压计等）',
+    needsConfirmation: true,
+    checkoutReminder: '确认顾客已登记领取后再完成结算',
+  },
+  {
+    id: 'B002',
+    memberId: 'M001',
+    title: '慢病复购提醒',
+    description: '您的高血压用药已到复购周期，可使用个账支付',
+    status: 'available',
+    expiryDate: '2026-12-31',
+    category: 'chronic',
+    guide: '提醒顾客复购慢病用药，个账可直接支付处方药部分',
+    script: '根据您的用药记录，高血压药物已到复购时间，您可以使用医保个人账户直接支付，无需额外手续。',
+    eligibleProducts: '高血压、糖尿病等慢病处方药（需凭处方）',
+    needsConfirmation: false,
+    checkoutReminder: '确认处方有效性，个账自动抵扣',
+  },
+  {
+    id: 'B003',
+    memberId: 'M001',
+    title: '家庭账户共享',
+    description: '您的医保个账余额可共享给家庭成员使用',
+    status: 'expiring',
+    expiryDate: '2026-07-15',
+    category: 'family',
+    guide: '顾客已开通家庭共济，提醒可替家人支付，需确认使用人身份',
+    script: '您已开通家庭账户共享功能，可以为配偶、子女或父母支付合规药品费用，本次是否使用共享账户支付？',
+    eligibleProducts: '家庭成员的医保目录内药品、诊疗项目',
+    needsConfirmation: true,
+    checkoutReminder: '确认使用人身份后再结算，需在支付时选择"家庭共济"',
+  },
+  {
+    id: 'B004',
+    memberId: 'M001',
+    title: '门诊统筹报销',
+    description: '本年度门诊统筹额度尚未使用完',
+    status: 'unavailable',
+    expiryDate: '2026-06-30',
+    category: 'other',
+    guide: '额度即将到期但系统暂时无法核实剩余金额，建议顾客咨询医保窗口',
+    script: '您的门诊统筹额度本月底到期，目前系统暂时无法核实剩余金额，建议您前往医保窗口确认后再使用。',
+    eligibleProducts: '门诊就诊、医保目录内药品',
+    needsConfirmation: true,
+    checkoutReminder: '暂不可用，需顾客确认后再操作',
+  },
+  {
+    id: 'B005',
+    memberId: 'M002',
+    title: '满额健康礼包',
+    description: '医保个账消费满150元可领取健康礼包',
+    status: 'expiring',
+    expiryDate: '2026-07-05',
+    category: 'gift',
+    guide: '消费满150元可领取，提醒顾客即将过期',
+    script: '您的健康礼包权益将于7月5日到期，目前只需再消费即可满足领取条件，是否需要选购合规商品？',
+    eligibleProducts: '医保目录内药品、医疗器械',
+    needsConfirmation: true,
+    checkoutReminder: '确认顾客领取意愿后登记',
+  },
+  {
+    id: 'B006',
+    memberId: 'M002',
+    title: '慢病复购提醒',
+    description: '您的糖尿病用药已到复购周期',
+    status: 'available',
+    expiryDate: '2026-12-31',
+    category: 'chronic',
+    guide: '提醒顾客复购糖尿病用药，个账可直接支付',
+    script: '根据您的用药记录，糖尿病药物已到复购时间，您可以使用医保个人账户直接支付，无需额外手续。',
+    eligibleProducts: '糖尿病处方药（需凭处方）',
+    needsConfirmation: false,
+    checkoutReminder: '确认处方有效性，个账自动抵扣',
+  },
+  {
+    id: 'B007',
+    memberId: 'M003',
+    title: '家庭账户共享',
+    description: '您的医保个账余额可共享给家庭成员使用',
+    status: 'available',
+    expiryDate: '2026-12-31',
+    category: 'family',
+    guide: '提醒顾客可为家人支付，需确认使用人身份',
+    script: '您已开通家庭账户共享功能，可以为配偶、子女或父母支付合规药品费用，本次是否使用共享账户支付？',
+    eligibleProducts: '家庭成员的医保目录内药品、诊疗项目',
+    needsConfirmation: true,
+    checkoutReminder: '确认使用人身份后再结算，需在支付时选择"家庭共济"',
+  },
+  {
+    id: 'B008',
+    memberId: 'M003',
+    title: '门诊统筹报销',
+    description: '本年度门诊统筹额度已用完',
+    status: 'unavailable',
+    expiryDate: '2026-12-31',
+    category: 'other',
+    guide: '本年度额度已用尽，不可再使用',
+    script: '您的本年度门诊统筹额度已使用完毕，日常购药仍可使用个人账户余额支付医保目录内药品。',
+    eligibleProducts: '暂不可用',
+    needsConfirmation: false,
+    checkoutReminder: '不可使用统筹，仅可使用个账余额',
+  },
+]
+
+export function findMemberByPhone(phone: string): Member | undefined {
+  return mockMembers.find((m) => m.phone === phone)
+}
+
+export function findMemberByCode(code: string): Member | undefined {
+  return mockMembers.find((m) => m.id === code)
+}
+
+export function getBenefitsByMemberId(memberId: string): Benefit[] {
+  return mockBenefits.filter((b) => b.memberId === memberId)
+}

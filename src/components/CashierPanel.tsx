@@ -17,7 +17,7 @@ import {
   BarChart3,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { CartItem, Benefit, FeedbackType } from '@/types'
 import MemberSearch from './MemberSearch'
 import CheckoutReminder from './CheckoutReminder'
@@ -59,6 +59,47 @@ export default function CashierPanel() {
     setConfirmations((prev) => ({ ...prev, [benefitId]: type }))
   }
 
+  const hasInsuredItems = useMemo(
+    () => items.some((i) => i.insuranceCovered),
+    [items]
+  )
+
+  useEffect(() => {
+    setConfirmations({})
+  }, [sessionId, member?.id])
+
+  const applicableBenefitIds = useMemo(() => {
+    if (!member || benefits.length === 0 || items.length === 0 || !hasInsuredItems) return new Set<string>()
+    const s = new Set<string>()
+    const coveredTotal = totalCovered
+    const cartKeywords = items.flatMap((i) => i.keywords || [])
+    benefits.forEach((b) => {
+      if (b.status === 'unavailable') return
+      if (b.category === 'gift') {
+        s.add(b.id)
+      } else if (b.category === 'chronic') {
+        const keywords = b.applicableKeywords || []
+        const matched = keywords.length > 0
+          ? keywords.some((k) => cartKeywords.includes(k))
+          : true
+        if (matched) s.add(b.id)
+      } else {
+        s.add(b.id)
+      }
+    })
+    return s
+  }, [member, benefits, items, totalCovered, hasInsuredItems])
+
+  useEffect(() => {
+    setConfirmations((prev) => {
+      const next: Record<string, FeedbackType> = {}
+      Object.entries(prev).forEach(([bid, type]) => {
+        if (applicableBenefitIds.has(bid)) next[bid] = type
+      })
+      return next
+    })
+  }, [applicableBenefitIds])
+
   const handleCheckout = () => {
     if (member && Object.keys(confirmations).length > 0) {
       const currentSessionId = sessionId
@@ -66,6 +107,7 @@ export default function CashierPanel() {
       const count = items.length
       const summary = items.map((i) => `${i.name}×${i.qty}`).join(', ')
       Object.entries(confirmations).forEach(([benefitId, type]) => {
+        if (!applicableBenefitIds.has(benefitId)) return
         const benefit = benefits.find((b) => b.id === benefitId)
         if (benefit) {
           submitFeedback(member, benefit, type, '', currentSessionId, covered, count, summary)

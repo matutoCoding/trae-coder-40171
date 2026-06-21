@@ -64,17 +64,20 @@ const feedbackOptions: {
 
 const typeLabel = (t: FeedbackType) => feedbackOptions.find((o) => o.type === t)?.label || t
 
+type Step = 'select' | 'feedback' | 'done'
+
 export default function FeedbackForm() {
-  const [step, setStep] = useState<'select' | 'feedback' | 'done'>('select')
+  const [step, setStep] = useState<Step>('select')
   const [pickedBenefit, setPickedBenefit] = useState<Benefit | null>(null)
   const [selected, setSelected] = useState<FeedbackType | null>(null)
   const [remark, setRemark] = useState('')
-  const { member, benefits, selectedBenefit: preselectedBenefit } = useAppStore()
+  const { member, benefits, selectedBenefit: preselectedBenefit, selectBenefit } = useAppStore()
   const { submitFeedback, submittedFeedbacks } = useFeedbackStore()
   const navigate = useNavigate()
 
-  const initialBenefit = pickedBenefit || preselectedBenefit
-  const currentStep = step === 'select' && initialBenefit ? 'feedback' : step
+  const hasPreselect = !!preselectedBenefit
+  const currentStep: Step = step === 'select' && hasPreselect && !pickedBenefit ? 'feedback' : step
+  const activeBenefit = pickedBenefit || preselectedBenefit
 
   const myFeedbacks = member
     ? submittedFeedbacks.filter((f) => f.memberId === member.id).slice(-5).reverse()
@@ -103,11 +106,25 @@ export default function FeedbackForm() {
     setStep('feedback')
   }
 
+  const handleSwitchBenefit = () => {
+    selectBenefit(null)
+    setPickedBenefit(null)
+    setStep('select')
+  }
+
   const handleSubmit = () => {
     const b = pickedBenefit || preselectedBenefit
     if (!selected || !b) return
     submitFeedback(member, b, selected, remark)
     setStep('done')
+  }
+
+  const resetForm = () => {
+    selectBenefit(null)
+    setPickedBenefit(null)
+    setSelected(null)
+    setRemark('')
+    setStep('select')
   }
 
   return (
@@ -121,11 +138,11 @@ export default function FeedbackForm() {
           返回
         </button>
         <div className="flex items-center gap-1 text-xs">
-          <span className={`rounded-full px-2 py-0.5 ${currentStep === 'select' || currentStep === 'feedback' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
+          <span className={`rounded-full px-2 py-0.5 ${currentStep === 'select' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
             1 选权益
           </span>
           <ChevronRight className="h-3 w-3 text-slate-300" />
-          <span className={`rounded-full px-2 py-0.5 ${currentStep === 'feedback' || currentStep === 'done' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
+          <span className={`rounded-full px-2 py-0.5 ${currentStep === 'feedback' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
             2 选反馈
           </span>
           <ChevronRight className="h-3 w-3 text-slate-300" />
@@ -170,22 +187,19 @@ export default function FeedbackForm() {
         </div>
       )}
 
-      {currentStep === 'feedback' && initialBenefit && (
+      {currentStep === 'feedback' && activeBenefit && (
         <div className="space-y-4">
           <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3.5">
             <p className="text-xs text-slate-500">当前反馈的权益</p>
             <div className="mt-1 flex items-start justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-slate-800">{initialBenefit.title}</p>
+                <p className="text-sm font-semibold text-slate-800">{activeBenefit.title}</p>
                 <p className="mt-0.5 text-xs text-slate-500">会员：{member.name}</p>
               </div>
-              <StatusBadge status={initialBenefit.status} />
+              <StatusBadge status={activeBenefit.status} />
             </div>
             <button
-              onClick={() => {
-                setPickedBenefit(null)
-                setStep('select')
-              }}
+              onClick={handleSwitchBenefit}
               className="mt-2 text-xs text-blue-600 hover:text-blue-700"
             >
               ← 换一项权益
@@ -258,7 +272,7 @@ export default function FeedbackForm() {
         </div>
       )}
 
-      {currentStep === 'done' && initialBenefit && (
+      {currentStep === 'done' && activeBenefit && (
         <div className="space-y-4">
           <div className="flex flex-col items-center justify-center rounded-xl bg-emerald-50 py-6">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 shadow-sm shadow-emerald-200">
@@ -266,7 +280,7 @@ export default function FeedbackForm() {
             </div>
             <p className="mt-3 text-sm font-semibold text-emerald-700">反馈已提交并记录</p>
             <p className="mt-1 text-xs text-emerald-600/70">
-              {initialBenefit.title} · {typeLabel(selected!)}
+              {activeBenefit.title} · {typeLabel(selected!)}
             </p>
           </div>
 
@@ -326,12 +340,7 @@ export default function FeedbackForm() {
 
           <div className="flex gap-2">
             <button
-              onClick={() => {
-                setStep('select')
-                setPickedBenefit(null)
-                setSelected(null)
-                setRemark('')
-              }}
+              onClick={resetForm}
               className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
             >
               继续反馈其他权益

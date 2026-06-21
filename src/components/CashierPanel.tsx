@@ -18,8 +18,9 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import type { CartItem } from '@/types'
+import type { CartItem, Benefit } from '@/types'
 import MemberSearch from './MemberSearch'
+import CheckoutReminder from './CheckoutReminder'
 
 const QUICK_ITEMS: Array<Omit<CartItem, 'qty'>> = [
   { id: 'P010', name: '复方感冒灵颗粒', price: 18.0, category: '药品', insuranceCovered: true },
@@ -37,7 +38,7 @@ const CAT_ICON: Record<string, typeof Pill> = {
 }
 
 export default function CashierPanel() {
-  const { member } = useAppStore()
+  const { member, selectBenefit } = useAppStore()
   const { items, addItem, removeItem, updateQty, clear, totalCovered, totalUncovered, total } = useCartStore()
   const { cashierName } = useCashierStore()
   const { submittedFeedbacks } = useFeedbackStore()
@@ -255,6 +256,13 @@ export default function CashierPanel() {
           </p>
           <MemberSearch />
         </div>
+
+        <CheckoutReminder
+          onFeedbackClick={(benefit: Benefit) => {
+            selectBenefit(benefit)
+            navigate('/feedback')
+          }}
+        />
       </div>
 
       <div className="border-t border-slate-200 bg-white px-5 py-3">

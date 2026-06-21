@@ -41,7 +41,10 @@ export default function BenefitList() {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-700">权益列表</h2>
         <button
-          onClick={() => navigate('/feedback')}
+          onClick={() => {
+            selectBenefit(null)
+            navigate('/feedback')
+          }}
           className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-200"
         >
           <FileCheck className="h-3.5 w-3.5" />
